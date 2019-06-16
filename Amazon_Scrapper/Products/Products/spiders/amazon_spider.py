@@ -1,9 +1,10 @@
 import scrapy
 
 
-class QuoteSpider(scrapy.Spider):
+class AmazonSpider(scrapy.Spider):
     name = "amazon_spider"
     print("lets starts")
+    next = 1
 
     def start_requests(self):
         print("inside start request")
@@ -22,7 +23,7 @@ class QuoteSpider(scrapy.Spider):
         print("inside parse method")
         products = response.css("div.a-section.a-spacing-medium")
         print("starting product")
-
+        next = 0
         for product in products:
 
             print("inside the loop")
@@ -45,3 +46,9 @@ class QuoteSpider(scrapy.Spider):
                     "Number of Reviews": no_of_people_Reviewd,
                     "image link": image,
                 }
+
+        if AmazonSpider.next <= 5:
+            AmazonSpider.next = AmazonSpider.next + 1
+            next_page_id = response.css("li.a-selected a::attr(href)").get()
+            next_page = response.urljoin(next_page_id)
+            yield scrapy.Request(next_page, callback=self.parse)
