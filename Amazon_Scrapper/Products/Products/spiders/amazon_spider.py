@@ -36,3 +36,12 @@ class QuoteSpider(scrapy.Spider):
             print(price)
             print(no_of_people_Reviewd)
             print(image)
+            if name is None or price is None or no_of_people_Reviewd is None or image is None:
+                continue
+            else:
+                yield {
+                    "Product Name": name,
+                    "Price": price,
+                    "Number of Reviews": no_of_people_Reviewd,
+                    "image link": image,
+                }
