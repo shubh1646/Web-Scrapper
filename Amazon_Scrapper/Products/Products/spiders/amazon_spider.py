@@ -4,39 +4,27 @@ import scrapy
 class AmazonSpider(scrapy.Spider):
     name = "amazon_spider"
     print("lets starts")
-    next = 1
+    page_no = 2
 
     def start_requests(self):
         print("inside start request")
         urls = [
-            "https://www.amazon.com/s?k=mobiles+phones&crid=39Y5STO9084OS&sprefix=mobiles+phone%2Caps%2C131&ref=nb_sb_ss_i_1_13"
+            "https://www.amazon.com/s?k = mobiles+phones & page = 1 & crid = 39Y5STO9084OS & qid = 1560789439"
         ]
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
-        # page = response.url.split("/")[-2]
-        # filename = 'quotes-%s.html' % page
-        # with open(filename, 'wb') as f:
-        #     f.write(response.body)
-        # self.log('Saved file %s' % filename)
-        print("inside parse method")
         products = response.css("div.a-section.a-spacing-medium")
         print("starting product")
-        next = 0
         for product in products:
 
-            print("inside the loop")
             name = product.css(
                 "span.a-size-medium.a-color-base.a-text-normal::text").get()
             price = product.css("span.a-offscreen::text").get()
             no_of_people_Reviewd = product.css("span.a-size-base::text").get()
             image = product.css("img.s-image::attr(src)").get()
 
-            print(name)
-            print(price)
-            print(no_of_people_Reviewd)
-            print(image)
             if name is None or price is None or no_of_people_Reviewd is None or image is None:
                 continue
             else:
@@ -46,9 +34,11 @@ class AmazonSpider(scrapy.Spider):
                     "Number of Reviews": no_of_people_Reviewd,
                     "image link": image,
                 }
+        next_page = "https://www.amazon.com/s?k=mobiles+phones&page=" + \
+            str(AmazonSpider.page_no)+"&crid=39Y5STO9084OS&qid=1560789439"
 
-        if AmazonSpider.next <= 5:
-            AmazonSpider.next = AmazonSpider.next + 1
-            next_page_id = response.css("li.a-selected a::attr(href)").get()
-            next_page = response.urljoin(next_page_id)
+        if AmazonSpider.page_no <= 5:
+
+            AmazonSpider.page_no = AmazonSpider.page_no + 1
+            print("inside loop for" + str(AmazonSpider.page_no) + "time")
             yield scrapy.Request(next_page, callback=self.parse)
